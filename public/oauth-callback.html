@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head><title>OAuth Callback</title></head>
+<body>
+<script>
+  try {
+    var hash = window.location.hash;
+    if (hash && window.opener) {
+      window.opener.postMessage(
+        { type: 'oauth_callback', hash: hash },
+        window.location.origin
+      );
+    }
+  } catch(e) {}
+  window.close();
+</script>
+</body>
+</html>

@@ -31,7 +31,7 @@ export async function signInWithGoogle(): Promise<string> {
     throw new Error('Google Client IDが設定されていません（EXPO_PUBLIC_GOOGLE_CLIENT_ID）');
   }
 
-  const redirectUri = window.location.origin;
+  const redirectUri = window.location.origin + '/oauth-callback.html';
   const scope = 'https://www.googleapis.com/auth/gmail.readonly';
 
   const authUrl =
@@ -54,35 +54,41 @@ export async function signInWithGoogle(): Promise<string> {
       return;
     }
 
-    // ポップアップが自サイトにリダイレクトされたらハッシュからトークンを取得
-    const timer = setInterval(() => {
-      try {
-        if (popup.closed) {
-          clearInterval(timer);
-          reject(new Error('ログインがキャンセルされました'));
-          return;
-        }
-        const hash = popup.location.hash;
-        if (hash && hash.includes('access_token')) {
-          clearInterval(timer);
-          popup.close();
-          const params = new URLSearchParams(hash.slice(1));
-          const token = params.get('access_token');
-          if (token) {
-            resolve(token);
-          } else {
-            reject(new Error('アクセストークンの取得に失敗しました'));
-          }
-        }
-      } catch {
-        // Googleのドメイン滞在中はクロスオリジンエラーが出る。無視して継続。
+    // oauth-callback.html からのpostMessageでトークンを受け取る
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      if (!event.data || event.data.type !== 'oauth_callback') return;
+      cleanup();
+      const hash: string = event.data.hash ?? '';
+      const params = new URLSearchParams(hash.slice(1));
+      const token = params.get('access_token');
+      if (token) {
+        resolve(token);
+      } else {
+        reject(new Error('アクセストークンの取得に失敗しました'));
+      }
+    };
+
+    // ポップアップが手動で閉じられた場合を検知
+    const closedTimer = setInterval(() => {
+      if (popup.closed) {
+        cleanup();
+        reject(new Error('ログインがキャンセルされました'));
       }
     }, 500);
 
-    // 5分でタイムアウト
-    setTimeout(() => {
-      clearInterval(timer);
+    const cleanup = () => {
+      window.removeEventListener('message', onMessage);
+      clearInterval(closedTimer);
+      clearTimeout(timeoutId);
       if (!popup.closed) popup.close();
+    };
+
+    window.addEventListener('message', onMessage);
+
+    // 5分でタイムアウト
+    const timeoutId = setTimeout(() => {
+      cleanup();
       reject(new Error('ログインがタイムアウトしました'));
     }, 5 * 60 * 1000);
   });
