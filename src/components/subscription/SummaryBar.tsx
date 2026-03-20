@@ -42,7 +42,7 @@ interface SummaryBarProps {
   hasNonMonthly?: boolean;
   /** 不定期課金のサブスクが存在するか（集計対象外の注意書き表示用） */
   hasIrregular?: boolean;
-  /** 「見直し中」セルをタップしたときのコールバック */
+  /** 「見直す」セルをタップしたときのコールバック */
   onReviewingPress?: () => void;
   /** 「更新が近い / 要確認」セルをタップしたときのコールバック */
   onRenewalAlertPress?: () => void;
@@ -98,7 +98,7 @@ export function SummaryBar({
       {(reviewingCount > 0 || renewalAlertCount > 0) && (
         <View style={styles.statsRow}>
           <StatCell
-            label="見直し中"
+            label="見直す"
             value={`${reviewingCount}件`}
             bold={reviewingCount > 0}
             accent={reviewingCount > 0}

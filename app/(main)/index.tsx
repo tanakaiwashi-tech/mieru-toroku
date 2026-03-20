@@ -24,9 +24,9 @@ type SortKey = 'createdAt' | 'nextRenewalDate' | 'amount';
 const FILTER_LABELS: Record<FilterStatus, string> = {
   all: '全て',
   active: '利用中',
-  reviewing: '見直し中',
-  cancel_planned: '解約予定',
-  stopped: '停止済み',
+  reviewing: '見直す',
+  cancel_planned: '解約する',
+  stopped: '解約済み',
 };
 const FILTERS: FilterStatus[] = ['all', 'active', 'reviewing', 'cancel_planned', 'stopped'];
 const SORT_LABELS: Record<SortKey, string> = {

@@ -15,9 +15,9 @@ export const BILLING_CYCLE_LABELS: Record<BillingCycle, string> = {
 
 export const STATUS_LABELS: Record<SubscriptionStatus, string> = {
   active: '利用中',
-  reviewing: '見直し中',
-  cancel_planned: '解約予定',
-  stopped: '停止済み',
+  reviewing: '見直す',
+  cancel_planned: '解約する',
+  stopped: '解約済み',
 };
 
 /**

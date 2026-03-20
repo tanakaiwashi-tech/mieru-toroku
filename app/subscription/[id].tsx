@@ -155,6 +155,11 @@ export default function SubscriptionDetailScreen() {
     router.replace('/(main)');
   };
 
+  const handleQuickStatusChange = async (newStatus: SubscriptionStatus) => {
+    if (!current) return;
+    await save(subscriptionToFormData(current, { status: newStatus }));
+  };
+
   // ─── ローディング中 / データなし ───
   if (isLoading || !current) {
     return (
@@ -330,6 +335,64 @@ export default function SubscriptionDetailScreen() {
             {current.status !== 'active' && <StatusBadge status={current.status} />}
           </View>
           {current.category && <Text style={styles.category}>{current.category}</Text>}
+
+          {/* クイックアクション: ステータス切り替え */}
+          <View style={styles.quickActions}>
+            {current.status === 'active' && (
+              <TouchableOpacity
+                style={[styles.quickBtn, styles.quickBtnReviewing]}
+                onPress={() => handleQuickStatusChange('reviewing')}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.quickBtnText, styles.quickBtnTextReviewing]}>見直す</Text>
+              </TouchableOpacity>
+            )}
+            {current.status === 'reviewing' && (
+              <>
+                <TouchableOpacity
+                  style={[styles.quickBtn, styles.quickBtnGhost]}
+                  onPress={() => handleQuickStatusChange('active')}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.quickBtnText, styles.quickBtnTextGhost]}>利用中に戻す</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.quickBtn, styles.quickBtnCancel]}
+                  onPress={() => handleQuickStatusChange('cancel_planned')}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.quickBtnText, styles.quickBtnTextCancel]}>解約する →</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            {current.status === 'cancel_planned' && (
+              <>
+                <TouchableOpacity
+                  style={[styles.quickBtn, styles.quickBtnGhost]}
+                  onPress={() => handleQuickStatusChange('active')}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.quickBtnText, styles.quickBtnTextGhost]}>利用中に戻す</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.quickBtn, styles.quickBtnStopped]}
+                  onPress={() => handleQuickStatusChange('stopped')}
+                  activeOpacity={0.75}
+                >
+                  <Text style={[styles.quickBtnText, styles.quickBtnTextStopped]}>解約済みにする ✓</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            {current.status === 'stopped' && (
+              <TouchableOpacity
+                style={[styles.quickBtn, styles.quickBtnGhost]}
+                onPress={() => handleQuickStatusChange('active')}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.quickBtnText, styles.quickBtnTextGhost]}>利用中に戻す</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
 
         {/* 詳細行: 表示する行がある場合のみ描画 */}
@@ -345,7 +408,7 @@ export default function SubscriptionDetailScreen() {
               <DetailRow label="利用開始日" value={formatDisplayDate(current.startDate)} />
             )}
             {current.cancelledAt && (
-              <DetailRow label="停止日" value={formatDisplayDate(current.cancelledAt)} />
+              <DetailRow label="解約日" value={formatDisplayDate(current.cancelledAt)} />
             )}
           </View>
         )}
@@ -658,6 +721,55 @@ const styles = StyleSheet.create({
     overflow: 'visible',
   },
   textarea: { minHeight: 72, textAlignVertical: 'top' },
+  // ─── クイックアクション ───
+  quickActions: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+    flexWrap: 'wrap',
+  },
+  quickBtn: {
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  quickBtnText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  // 見直す（amber）
+  quickBtnReviewing: {
+    backgroundColor: '#FFF3E0',
+    borderColor: '#F9A825',
+  },
+  quickBtnTextReviewing: {
+    color: '#8D6200',
+  },
+  // 解約する（red）
+  quickBtnCancel: {
+    backgroundColor: '#FDECEA',
+    borderColor: '#E57373',
+  },
+  quickBtnTextCancel: {
+    color: '#B04040',
+  },
+  // 解約済み（gray）
+  quickBtnStopped: {
+    backgroundColor: '#F0F0F0',
+    borderColor: '#BDBDBD',
+  },
+  quickBtnTextStopped: {
+    color: '#616161',
+  },
+  // 利用中に戻す（ghost）
+  quickBtnGhost: {
+    backgroundColor: 'transparent',
+    borderColor: COLORS.border,
+  },
+  quickBtnTextGhost: {
+    color: COLORS.textSecondary,
+  },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: COLORS.border, gap: 8 },
   saveErrorText: {
     fontSize: 13,
