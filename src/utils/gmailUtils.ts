@@ -90,36 +90,67 @@ export async function signInWithGoogle(): Promise<string> {
 
 /**
  * Gmail APIでメタデータを取得し、サブスク候補リストを返す。
- * 直近3ヶ月の請求・更新メールを検索し、差出人ドメインで辞書と照合する。
+ * ①差出人ドメイン検索 と ②件名キーワード検索 の2クエリを並列実行し結果をマージする。
  */
 export async function scanGmailForSubscriptions(
   accessToken: string,
 ): Promise<GmailCandidate[]> {
-  const baseUrl = 'https://gmail.googleapis.com/gmail/v1/users/me';
   const authHeaders = { Authorization: `Bearer ${accessToken}` };
 
-  // 請求・更新メール関連キーワードで直近3ヶ月を検索
-  const query =
-    'subject:(請求 OR 領収 OR 更新 OR 料金 OR invoice OR billing OR receipt OR payment OR subscription) newer_than:3m';
+  // ① 辞書の主要ドメインで直接検索（件名不問・直近12ヶ月）
+  const topDomains = GMAIL_SENDER_PATTERNS.slice(0, 18).map((p) => `from:${p.senderDomain}`);
+  const domainQuery = `(${topDomains.join(' OR ')}) newer_than:12m`;
 
-  const listRes = await fetch(
-    `${baseUrl}/messages?q=${encodeURIComponent(query)}&maxResults=100`,
-    { headers: authHeaders },
-  );
+  // ② 件名キーワード検索（広めのキーワードで直近12ヶ月）
+  const subjectQuery =
+    '(subject:請求 OR subject:領収 OR subject:料金 OR subject:会費 OR subject:お支払い OR subject:invoice OR subject:billing OR subject:receipt OR subject:payment OR subject:subscription OR subject:renewal) newer_than:12m';
 
-  if (!listRes.ok) {
-    if (listRes.status === 401) throw new Error('認証の有効期限が切れました。再スキャンしてください。');
-    throw new Error(`Gmailの取得に失敗しました（${listRes.status}）`);
+  // 2クエリを並列実行
+  const [domainRes, subjectRes] = await Promise.all([
+    fetchMessageIds(domainQuery, authHeaders),
+    fetchMessageIds(subjectQuery, authHeaders),
+  ]);
+
+  if (!domainRes.ok && !subjectRes.ok) {
+    const status = domainRes.status;
+    if (status === 401) throw new Error('認証の有効期限が切れました。再スキャンしてください。');
+    throw new Error(`Gmailの取得に失敗しました（${status}）`);
   }
 
-  const listData = (await listRes.json()) as { messages?: { id: string }[] };
-  const messages = listData.messages ?? [];
-  if (messages.length === 0) return [];
+  // IDを重複排除してマージ
+  const seen = new Set<string>();
+  const allMessages: { id: string }[] = [];
+  for (const msg of [...domainRes.messages, ...subjectRes.messages]) {
+    if (!seen.has(msg.id)) {
+      seen.add(msg.id);
+      allMessages.push(msg);
+    }
+  }
 
-  // 先頭50件のメタデータを取得（API使用量を最小化）
-  const metaList = await fetchMessagesMetadata(messages.slice(0, 50), accessToken);
+  if (allMessages.length === 0) return [];
+
+  // 先頭60件のメタデータを取得
+  const metaList = await fetchMessagesMetadata(allMessages.slice(0, 60), authHeaders.Authorization.replace('Bearer ', ''));
 
   return matchCandidates(metaList);
+}
+
+/** Gmail messages.list を呼び出してメッセージID一覧を返す */
+async function fetchMessageIds(
+  query: string,
+  headers: { Authorization: string },
+): Promise<{ ok: boolean; status: number; messages: { id: string }[] }> {
+  try {
+    const res = await fetch(
+      `https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${encodeURIComponent(query)}&maxResults=50`,
+      { headers },
+    );
+    if (!res.ok) return { ok: false, status: res.status, messages: [] };
+    const data = (await res.json()) as { messages?: { id: string }[] };
+    return { ok: true, status: 200, messages: data.messages ?? [] };
+  } catch {
+    return { ok: false, status: 0, messages: [] };
+  }
 }
 
 /** メッセージIDリストからメタデータ（件名・差出人・日付）を並列取得 */
