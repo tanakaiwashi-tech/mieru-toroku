@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { Subscription } from '@/src/types';
 import { COLORS } from '@/src/constants/colors';
@@ -7,6 +7,7 @@ import { BILLING_CYCLE_LABELS, UPCOMING_RENEWAL_DAYS } from '@/src/constants/app
 import { formatAmount } from '@/src/utils/amountUtils';
 import { formatShortDate, isWithinNextDays, isOverdueRenewal } from '@/src/utils/dateUtils';
 import { StatusBadge } from '@/src/components/ui/StatusBadge';
+import { getServiceLogoUrl } from '@/src/constants/serviceLogos';
 
 /** 頭文字アバター: 英字は大文字化、日本語・記号はそのまま1文字 */
 function getAvatarChar(name: string): string {
@@ -23,12 +24,24 @@ export function SubscriptionListItem({ subscription, onPress }: SubscriptionList
   const isOverdue = subscription.status === 'active' && isOverdueRenewal(subscription.nextRenewalDate);
   const isUpcoming = !isOverdue && subscription.status === 'active' && isWithinNextDays(subscription.nextRenewalDate, UPCOMING_RENEWAL_DAYS);
 
+  const [logoError, setLogoError] = useState(false);
+  const logoUrl = getServiceLogoUrl(subscription.normalizedName);
+  const showLogo = !!logoUrl && !logoError;
+
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7} style={styles.container}>
       <View style={[styles.avatar, isOverdue && styles.avatarOverdue, isUpcoming && styles.avatarUpcoming]}>
-        <Text style={[styles.avatarChar, isOverdue && styles.avatarCharAlert]}>
-          {getAvatarChar(subscription.serviceName)}
-        </Text>
+        {showLogo ? (
+          <Image
+            source={{ uri: logoUrl }}
+            style={styles.logoImage}
+            onError={() => setLogoError(true)}
+          />
+        ) : (
+          <Text style={[styles.avatarChar, isOverdue && styles.avatarCharAlert]}>
+            {getAvatarChar(subscription.serviceName)}
+          </Text>
+        )}
       </View>
       <View style={styles.body}>
         <View style={styles.topRow}>
@@ -91,6 +104,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.primary,
+  },
+  logoImage: {
+    width: 32,
+    height: 32,
+    borderRadius: 7,
   },
   body: {
     flex: 1,
