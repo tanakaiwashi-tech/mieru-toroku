@@ -73,6 +73,16 @@ export interface SubscriptionSummary {
   overdueRenewalCount: number;
 }
 
+/** サービス辞書内で複数価格帯がある場合のプラン選択肢 */
+export interface PricingPlan {
+  label: string;
+  amount: number;
+  /** 省略時は entry の defaultBillingCycle を引き継ぐ */
+  billingCycle?: BillingCycle;
+  /** 省略時は entry の currency を引き継ぐ */
+  currency?: Currency;
+}
+
 export interface ServiceDictionaryEntry {
   id: string;
   name: string;
@@ -85,6 +95,8 @@ export interface ServiceDictionaryEntry {
   currency?: Currency;
   popularityRank: number;
   officialCancelUrl: string | null;
+  /** 複数の価格帯がある場合のプランリスト。省略時は単一価格 */
+  plans?: PricingPlan[];
 }
 
 export interface SubscriptionFormData {

@@ -34,6 +34,7 @@ import { AmountField } from '@/src/components/ui/AmountField';
 import { ServiceNameAutocomplete } from '@/src/components/subscription/ServiceNameAutocomplete';
 import { COLORS } from '@/src/constants/colors';
 import { validateSubscriptionForm } from '@/src/utils/validationUtils';
+import type { PricingPlan } from '@/src/types';
 
 export default function NewSubscriptionScreen() {
   const { save } = useSubscription();
@@ -44,6 +45,9 @@ export default function NewSubscriptionScreen() {
   const [currency, setCurrency] = useState<Currency>('JPY');
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly');
   const [category, setCategory] = useState<CategoryOption | null>(null);
+  // プラン選択（複数価格帯のあるサービス用）
+  const [availablePlans, setAvailablePlans] = useState<PricingPlan[]>([]);
+  const [selectedPlanIndex, setSelectedPlanIndex] = useState<number | null>(null);
   const [nextRenewalDate, setNextRenewalDate] = useState('');
   const [trialEndDate, setTrialEndDate] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -62,6 +66,24 @@ export default function NewSubscriptionScreen() {
     setCurrency(entry.currency ?? 'JPY');
     if (entry.officialCancelUrl) {
       setCustomCancelUrl(entry.officialCancelUrl);
+    }
+    // 複数プランがある場合: defaultAmount に対応するプランを初期選択
+    if (entry.plans && entry.plans.length > 0) {
+      setAvailablePlans(entry.plans);
+      const defaultIdx = entry.plans.findIndex((p) => p.amount === entry.defaultAmount);
+      setSelectedPlanIndex(defaultIdx >= 0 ? defaultIdx : 0);
+    } else {
+      setAvailablePlans([]);
+      setSelectedPlanIndex(null);
+    }
+  };
+
+  // サービス名を手入力で変更したとき、プラン選択をリセット
+  const handleServiceNameChange = (text: string) => {
+    setServiceName(text);
+    if (availablePlans.length > 0) {
+      setAvailablePlans([]);
+      setSelectedPlanIndex(null);
     }
   };
 
@@ -136,12 +158,51 @@ export default function NewSubscriptionScreen() {
             <ServiceNameAutocomplete
               label="サービス名 *"
               value={serviceName}
-              onChangeText={setServiceName}
+              onChangeText={handleServiceNameChange}
               onSelectSuggestion={handleSelectSuggestion}
               placeholder="Netflix, Spotify..."
               error={errors.serviceName}
               maxLength={50}
             />
+            {/* プラン選択チップ（複数価格帯があるサービスのみ表示） */}
+            {availablePlans.length > 0 && (
+              <View style={styles.planSection}>
+                <Text style={styles.planLabel}>プラン</Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.planChipsRow}
+                  keyboardShouldPersistTaps="handled"
+                >
+                  {availablePlans.map((plan, i) => {
+                    const active = selectedPlanIndex === i;
+                    const priceStr = plan.currency === 'USD'
+                      ? `$${plan.amount}`
+                      : `¥${plan.amount.toLocaleString()}`;
+                    return (
+                      <TouchableOpacity
+                        key={i}
+                        style={[styles.planChip, active && styles.planChipActive]}
+                        onPress={() => {
+                          setSelectedPlanIndex(i);
+                          setAmount(String(plan.amount));
+                          if (plan.billingCycle) setBillingCycle(plan.billingCycle);
+                          if (plan.currency) setCurrency(plan.currency);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.planChipLabel, active && styles.planChipLabelActive]}>
+                          {plan.label}
+                        </Text>
+                        <Text style={[styles.planChipPrice, active && styles.planChipPriceActive]}>
+                          {priceStr}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
             <SelectField
               label="支払いサイクル *"
               value={billingCycle}
@@ -253,4 +314,45 @@ const styles = StyleSheet.create({
   },
   textarea: { minHeight: 80, textAlignVertical: 'top' },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: COLORS.border },
+  planSection: {
+    gap: 6,
+  },
+  planLabel: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: COLORS.textMuted,
+  },
+  planChipsRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingBottom: 2,
+  },
+  planChip: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'center',
+    gap: 1,
+  },
+  planChipActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  planChipLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  planChipLabelActive: {
+    color: '#FFFFFF',
+  },
+  planChipPrice: {
+    fontSize: 11,
+    color: COLORS.textMuted,
+  },
+  planChipPriceActive: {
+    color: 'rgba(255,255,255,0.8)',
+  },
 });

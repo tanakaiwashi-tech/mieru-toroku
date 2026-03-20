@@ -144,9 +144,11 @@ export function ServiceNameAutocomplete({
               >
                 <Text style={styles.itemName}>{entry.name}</Text>
                 <Text style={styles.itemMeta}>
-                  {entry.defaultAmount !== null
-                    ? `${entry.currency === 'USD' ? '$' : '¥'}${entry.defaultAmount.toLocaleString()}〜`
-                    : entry.category}
+                  {entry.plans && entry.plans.length > 0
+                    ? `${entry.plans.length}プラン`
+                    : entry.defaultAmount !== null
+                      ? `${entry.currency === 'USD' ? '$' : '¥'}${entry.defaultAmount.toLocaleString()}`
+                      : entry.category}
                 </Text>
               </TouchableOpacity>
             ))}
