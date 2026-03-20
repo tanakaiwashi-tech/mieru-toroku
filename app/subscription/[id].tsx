@@ -240,7 +240,7 @@ export default function SubscriptionDetailScreen() {
                   <Ionicons name="time-outline" size={16} color={COLORS.warning.text} />
                   <View style={styles.renewalBannerBody}>
                     <Text style={styles.renewalBannerText}>
-                      更新日が過ぎています。次の更新日 {suggestedRenewalDate} に更新しますか？
+                      {`更新日が過ぎています。\n次の更新日 ${suggestedRenewalDate} に更新しますか？`}
                     </Text>
                     <View style={styles.renewalBannerActions}>
                       <TouchableOpacity
@@ -487,7 +487,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  summaryAmount: { fontSize: 20, fontWeight: '700', color: COLORS.text },
+  summaryAmount: { fontSize: 20, fontWeight: '700', color: COLORS.text, flex: 1 },
   category: { fontSize: 13, color: COLORS.textMuted },
   detailSection: {
     backgroundColor: COLORS.surface,
@@ -568,24 +568,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
     textAlign: 'center',
+    lineHeight: 22,
   },
   confirmDesc: {
     fontSize: 13,
     color: COLORS.textMuted,
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 20,
   },
   confirmTitleDestructive: {
     fontSize: 15,
     fontWeight: '600',
     color: COLORS.destructive,
     textAlign: 'center',
+    lineHeight: 22,
   },
   confirmDescDestructive: {
     fontSize: 13,
     color: COLORS.destructive,
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 20,
     opacity: 0.85,
   },
   confirmButtons: {
@@ -610,7 +612,7 @@ const styles = StyleSheet.create({
   renewalBannerText: {
     fontSize: 13,
     color: COLORS.warning.text,
-    lineHeight: 18,
+    lineHeight: 20,
   },
   renewalBannerActions: {
     flexDirection: 'row',
@@ -661,5 +663,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.destructive,
     textAlign: 'center',
+    lineHeight: 20,
   },
 });

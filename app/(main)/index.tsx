@@ -41,7 +41,7 @@ function EmptyState() {
     <View style={styles.empty}>
       <Ionicons name="receipt-outline" size={48} color={COLORS.textMuted} />
       <Text style={styles.emptyTitle}>まだ登録がありません</Text>
-      <Text style={styles.emptyDesc}>使っているサブスクを登録して、支出を整理しましょう</Text>
+      <Text style={styles.emptyDesc}>{'使っているサブスクを登録して、\n支出を整理しましょう'}</Text>
       <TouchableOpacity
         style={styles.emptyButton}
         onPress={() => router.push('/subscription/new')}

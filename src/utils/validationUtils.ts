@@ -82,8 +82,8 @@ export function validateSubscriptionForm(fields: {
   }
   if (fields.billingCycle !== 'free' && !isValidAmount(fields.amount)) {
     errors.amount = fields.currency === 'USD'
-      ? '1以上のドル金額（整数）を入力してください'
-      : `1〜${AMOUNT_MAX.toLocaleString()}円の整数を入力してください`;
+      ? '1以上の整数（ドル）を入力してください'
+      : `1〜${AMOUNT_MAX.toLocaleString()}の整数を入力してください`;
   }
   if (fields.nextRenewalDate && !isValidDateString(fields.nextRenewalDate)) {
     errors.nextRenewalDate = '実在する日付を入力してください';
@@ -95,7 +95,7 @@ export function validateSubscriptionForm(fields: {
     errors.startDate = '実在する日付を入力してください';
   }
   if (fields.customCancelUrl.trim() && !isSafeUrl(fields.customCancelUrl.trim())) {
-    errors.customCancelUrl = 'https:// または http:// で始まるURLを入力してください';
+    errors.customCancelUrl = 'https:// か http:// で始まるURLを入力してください';
   }
 
   return errors;

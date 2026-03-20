@@ -127,7 +127,7 @@ export default function NewSubscriptionScreen() {
     } else if (result.error === 'limit_reached') {
       Alert.alert(
         '登録上限に達しました',
-        `このアプリでは最大 ${FREE_LIMIT_COUNT} 件まで登録できます。一覧から外すと空きができます。`,
+        `最大${FREE_LIMIT_COUNT}件まで登録できます。\n一覧から外すと空きができます。`,
         [{ text: 'OK' }],
       );
     } else {

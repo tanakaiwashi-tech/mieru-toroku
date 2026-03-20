@@ -18,7 +18,7 @@ function EmptyState() {
     <View style={styles.empty}>
       <Ionicons name="eye-off-outline" size={48} color={COLORS.textMuted} />
       <Text style={styles.emptyTitle}>非表示にした項目はありません</Text>
-      <Text style={styles.emptyDesc}>詳細画面で「非表示にする」を押すと、ここに保管されます</Text>
+      <Text style={styles.emptyDesc}>{'詳細画面で「非表示にする」を押すと、\nここに保管されます'}</Text>
     </View>
   );
 }

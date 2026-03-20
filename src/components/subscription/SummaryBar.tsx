@@ -134,6 +134,8 @@ const styles = StyleSheet.create({
   },
   totalLabelRow: {
     gap: 2,
+    flex: 1,
+    marginRight: 12,
   },
   totalLabel: {
     fontSize: 13,
@@ -153,6 +155,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.textMuted,
     marginTop: -2,
+    lineHeight: 16,
   },
   statsRow: {
     flexDirection: 'row',
@@ -186,6 +189,7 @@ const styles = StyleSheet.create({
   cellLabel: {
     fontSize: 11,
     color: COLORS.textMuted,
+    textAlign: 'center',
   },
   cellLabelTappable: {
     color: COLORS.primary,
