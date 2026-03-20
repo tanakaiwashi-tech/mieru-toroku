@@ -272,7 +272,7 @@ export default function SubscriptionDetailScreen() {
             <Text style={styles.sectionTitle}>メモ・解約URL</Text>
             <View style={styles.section}>
               <TextInput
-                label="解約ページURL"
+                label="解約URL"
                 value={customCancelUrl}
                 onChangeText={setCustomCancelUrl}
                 placeholder="https://..."
@@ -339,7 +339,7 @@ export default function SubscriptionDetailScreen() {
               <DetailRow label="次回更新日" value={formatDisplayDate(current.nextRenewalDate)} />
             )}
             {current.trialEndDate && (
-              <DetailRow label="トライアル終了" value={formatDisplayDate(current.trialEndDate)} />
+              <DetailRow label="トライアル終了日" value={formatDisplayDate(current.trialEndDate)} />
             )}
             {current.startDate && (
               <DetailRow label="利用開始日" value={formatDisplayDate(current.startDate)} />

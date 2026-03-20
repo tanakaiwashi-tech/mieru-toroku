@@ -253,7 +253,7 @@ export default function NewSubscriptionScreen() {
           <Text style={styles.sectionTitle}>メモ・解約URL</Text>
           <View style={styles.section}>
             <TextInput
-              label="解約ページURL"
+              label="解約URL"
               value={customCancelUrl}
               onChangeText={setCustomCancelUrl}
               placeholder="https://..."

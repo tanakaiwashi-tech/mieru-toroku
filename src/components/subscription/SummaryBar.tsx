@@ -58,7 +58,7 @@ export function SummaryBar({
   // 更新日セルは「超過」優先表示。超過がない場合のみ「更新が近い」を表示。
   // 合算することで件数とラベルの意味がずれるのを防ぐ。
   const renewalAlertCount = overdueRenewalCount > 0 ? overdueRenewalCount : upcomingRenewalCount;
-  const renewalAlertLabel = overdueRenewalCount > 0 ? '要確認（更新日）' : '更新が近い';
+  const renewalAlertLabel = overdueRenewalCount > 0 ? '更新日を確認' : '更新が近い';
 
   // 月額 ↔ 年額トグル
   const [showYearly, setShowYearly] = useState(false);
@@ -77,7 +77,7 @@ export function SummaryBar({
         <View style={styles.totalLabelRow}>
           <Text style={styles.totalLabel}>{displayLabel}</Text>
           <Text style={styles.toggleHint}>
-            {showYearly ? '↩ 月額に切り替え' : '↔ 年額でも見る'}
+            {showYearly ? '← 月額に切り替え' : '年額でも見る →'}
           </Text>
         </View>
         <Text style={styles.totalAmount}>{formatAmount(displayAmount)}</Text>

@@ -49,11 +49,14 @@ export function SubscriptionListItem({ subscription, onPress }: SubscriptionList
               {isUpcoming && (
                 <Ionicons name="time-outline" size={12} color={COLORS.status.reviewing.text} />
               )}
-              <Text style={[
-                styles.renewal,
-                isOverdue && styles.renewalOverdue,
-                isUpcoming && styles.renewalUpcoming,
-              ]}>
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.renewal,
+                  isOverdue && styles.renewalOverdue,
+                  isUpcoming && styles.renewalUpcoming,
+                ]}
+              >
                 {isOverdue ? '更新日超過 ' : '更新が近い '}
                 {formatShortDate(subscription.nextRenewalDate)}
               </Text>
@@ -128,6 +131,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
+    flexShrink: 1,
   },
   renewal: {
     fontSize: 12,
