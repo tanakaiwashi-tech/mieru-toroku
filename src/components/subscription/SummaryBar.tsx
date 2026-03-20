@@ -83,17 +83,15 @@ export function SummaryBar({
         <Text style={styles.totalAmount}>{formatAmount(displayAmount)}</Text>
       </TouchableOpacity>
 
-      {/* 年払い・3ヶ月払い含む場合の注意書き */}
-      {hasNonMonthly && (
-        <Text style={styles.hint}>※ 年払い・3ヶ月払いは月額換算で集計しています</Text>
-      )}
-      {/* ドル建てサブスク含む場合の注意書き */}
-      {hasUSD && (
-        <Text style={styles.hint}>※ ドル建ては1ドル=150円で換算しています</Text>
-      )}
-      {/* 不定期課金（集計対象外）が存在する場合の注意書き */}
-      {hasIrregular && (
-        <Text style={styles.hint}>※ 不定期課金は月額集計の対象外です</Text>
+      {/* 注意書き: 該当するものを1行にまとめて表示 */}
+      {(hasNonMonthly || hasUSD || hasIrregular) && (
+        <Text style={styles.hint}>
+          {'※ ' + [
+            hasNonMonthly && '年払い換算含む',
+            hasUSD && 'USD=¥150換算',
+            hasIrregular && '不定期除く',
+          ].filter(Boolean).join(' · ')}
+        </Text>
       )}
 
       <View style={styles.statsRow}>

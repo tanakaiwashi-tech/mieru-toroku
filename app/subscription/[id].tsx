@@ -128,7 +128,7 @@ export default function SubscriptionDetailScreen() {
       trialEndDate: trialEndDate || null,
       startDate: startDate || null,
       memo: memo || null,
-      cancelMemo: cancelMemo || null,
+      cancelMemo: current.cancelMemo ?? null, // フォームで編集しないが既存値を保持
       customCancelUrl: customCancelUrl.trim() || null,
       isArchived: current.isArchived,
     };
@@ -190,6 +190,7 @@ export default function SubscriptionDetailScreen() {
             contentContainerStyle={styles.scroll}
             keyboardShouldPersistTaps="handled"
           >
+            <Text style={styles.sectionTitle}>基本情報</Text>
             <View style={styles.section}>
               <ServiceNameAutocomplete
                 label="サービス名 *"
@@ -200,7 +201,7 @@ export default function SubscriptionDetailScreen() {
                 maxLength={50}
               />
               <SelectField
-                label="支払いサイクル"
+                label="支払いサイクル *"
                 value={billingCycle}
                 options={BILLING_CYCLE_OPTIONS}
                 displayLabel={(v) => BILLING_CYCLE_LABELS[v]}
@@ -214,6 +215,10 @@ export default function SubscriptionDetailScreen() {
                 onToggleCurrency={() => setCurrency((c) => (c === 'JPY' ? 'USD' : 'JPY'))}
                 error={errors.amount}
               />
+            </View>
+
+            <Text style={styles.sectionTitle}>詳細（任意）</Text>
+            <View style={styles.section}>
               <SelectField
                 label="カテゴリ"
                 value={category}
@@ -262,22 +267,10 @@ export default function SubscriptionDetailScreen() {
               <DatePickerField label="次回更新日" value={nextRenewalDate} onChange={setNextRenewalDate} error={errors.nextRenewalDate} />
               <DatePickerField label="トライアル終了日" value={trialEndDate} onChange={setTrialEndDate} error={errors.trialEndDate} />
               <DatePickerField label="利用開始日" value={startDate} onChange={setStartDate} error={errors.startDate} />
-              <TextInput
-                label="メモ"
-                value={memo}
-                onChangeText={setMemo}
-                multiline
-                numberOfLines={3}
-                style={styles.textarea}
-              />
-              <TextInput
-                label="解約メモ"
-                value={cancelMemo}
-                onChangeText={setCancelMemo}
-                multiline
-                numberOfLines={2}
-                style={styles.textarea}
-              />
+            </View>
+
+            <Text style={styles.sectionTitle}>メモ・解約URL</Text>
+            <View style={styles.section}>
               <TextInput
                 label="解約ページURL"
                 value={customCancelUrl}
@@ -286,6 +279,15 @@ export default function SubscriptionDetailScreen() {
                 autoCapitalize="none"
                 keyboardType="url"
                 error={errors.customCancelUrl}
+              />
+              <TextInput
+                label="メモ（任意）"
+                value={memo}
+                onChangeText={setMemo}
+                placeholder="自由にメモ..."
+                multiline
+                numberOfLines={3}
+                style={styles.textarea}
               />
             </View>
           </ScrollView>
@@ -332,7 +334,9 @@ export default function SubscriptionDetailScreen() {
 
         {/* 詳細行 */}
         <View style={styles.detailSection}>
-          <DetailRow label="次回更新日" value={formatDisplayDate(current.nextRenewalDate)} />
+          {current.nextRenewalDate && (
+            <DetailRow label="次回更新日" value={formatDisplayDate(current.nextRenewalDate)} />
+          )}
           {current.trialEndDate && (
             <DetailRow label="トライアル終了" value={formatDisplayDate(current.trialEndDate)} />
           )}
@@ -432,9 +436,6 @@ export default function SubscriptionDetailScreen() {
                 variant="ghost"
                 size="sm"
               />
-              {!current.isArchived && (
-                <Text style={styles.actionHint}>後から見返せます</Text>
-              )}
               <TouchableOpacity
                 onPress={() => setConfirmAction('delete')}
                 style={styles.deleteLink}
@@ -529,11 +530,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     gap: 8,
     alignItems: 'center',
-  },
-  actionHint: {
-    fontSize: 12,
-    color: COLORS.textMuted,
-    textAlign: 'center',
   },
   deleteLink: {
     paddingVertical: 8,
@@ -640,6 +636,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.warning.text,
   },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+    letterSpacing: 0.3,
+    marginTop: 8,
+    marginBottom: 4,
+  },
   section: {
     gap: 14,
     backgroundColor: COLORS.surface,
@@ -647,6 +651,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.border,
     padding: 16,
+    overflow: 'visible',
   },
   textarea: { minHeight: 72, textAlignVertical: 'top' },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: COLORS.border, gap: 8 },
