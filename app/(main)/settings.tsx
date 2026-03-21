@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/src/constants/colors';
 import { useSubscriptionStore } from '@/src/stores/subscriptionStore';
+import { useUiPrefsStore } from '@/src/stores/uiPrefsStore';
 import {
   exportSubscriptionsAsJSON,
   exportSubscriptionsAsCSV,
@@ -24,9 +25,21 @@ type ImportPhase =
   | { phase: 'previewing'; data: ExportData }
   | { phase: 'error'; message: string };
 
+function formatScanDate(iso: string | null): string {
+  if (!iso) return 'なし';
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  const h = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  return `${y}/${mo}/${day} ${h}:${min}`;
+}
+
 export default function SettingsScreen() {
   const subscriptions = useSubscriptionStore((s) => s.subscriptions);
   const importSubscriptions = useSubscriptionStore((s) => s.importSubscriptions);
+  const lastGmailScanAt = useUiPrefsStore((s) => s.lastGmailScanAt);
   const [isExporting, setIsExporting] = useState(false);
   const [importPhase, setImportPhase] = useState<ImportPhase>({ phase: 'idle' });
 
@@ -133,7 +146,7 @@ export default function SettingsScreen() {
         <Text style={styles.groupLabel}>Gmail連携</Text>
         <View style={styles.group}>
           <TouchableOpacity
-            style={styles.row}
+            style={[styles.row, styles.rowBorder]}
             onPress={() => router.push('/(main)/gmail-scan')}
             activeOpacity={0.7}
           >
@@ -148,6 +161,15 @@ export default function SettingsScreen() {
             </View>
             <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
           </TouchableOpacity>
+          <View style={styles.row}>
+            <View style={styles.rowLeft}>
+              <View style={styles.iconWrap}>
+                <Ionicons name="time-outline" size={19} color={COLORS.textMuted} />
+              </View>
+              <Text style={styles.rowLabel}>最終スキャン日時</Text>
+            </View>
+            <Text style={styles.rowValue}>{formatScanDate(lastGmailScanAt)}</Text>
+          </View>
         </View>
 
         {/* データ管理 */}

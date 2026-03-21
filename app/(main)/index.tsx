@@ -81,7 +81,7 @@ function FilteredEmptyState({ onClear }: { onClear: () => void }) {
 export default function HomeScreen() {
   const { subscriptions, summary } = useSubscriptions();
   const batchRolloverRenewalDates = useSubscriptionStore((s) => s.batchRolloverRenewalDates);
-  const { sortKey, setSortKey } = useUiPrefsStore();
+  const { sortKey, setSortKey, filterTipDismissed, setFilterTipDismissed } = useUiPrefsStore();
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
 
   const handleItemPress = (item: Subscription) => {
@@ -189,6 +189,23 @@ export default function HomeScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* フィルターチップ初回説明 */}
+      {!filterTipDismissed && subscriptions.length > 0 && (
+        <View style={styles.filterTip}>
+          <View style={styles.filterTipBody}>
+            <Ionicons name="information-circle-outline" size={14} color={COLORS.textSecondary} />
+            <Text style={styles.filterTipText}>
+              <Text style={styles.filterTipBold}>見直す</Text>＝要検討、
+              <Text style={styles.filterTipBold}>解約する</Text>＝手続き予定、
+              <Text style={styles.filterTipBold}>解約済み</Text>＝完了
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => setFilterTipDismissed(true)} hitSlop={8}>
+            <Ionicons name="close" size={16} color={COLORS.textMuted} />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* 解約する放置バナー: STALE_CANCEL_DAYS 日以上手続きが止まっている場合に表示 */}
       {summary.staleCancelCount > 0 && (
@@ -316,6 +333,33 @@ const styles = StyleSheet.create({
   },
   chipTextActive: {
     color: '#FFFFFF',
+  },
+  filterTip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: COLORS.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.borderLight,
+    gap: 8,
+  },
+  filterTipBody: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    flexWrap: 'wrap',
+  },
+  filterTipText: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    flex: 1,
+    flexWrap: 'wrap',
+  },
+  filterTipBold: {
+    fontWeight: '600',
+    color: COLORS.text,
   },
   staleBanner: {
     flexDirection: 'row',

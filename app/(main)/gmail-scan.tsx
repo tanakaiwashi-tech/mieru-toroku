@@ -15,6 +15,7 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '@/src/constants/colors';
 import { useSubscriptionStore } from '@/src/stores/subscriptionStore';
+import { useUiPrefsStore } from '@/src/stores/uiPrefsStore';
 import {
   signInWithGoogle,
   scanGmailForSubscriptions,
@@ -39,6 +40,7 @@ interface CandidateDetail {
 export default function GmailScanScreen() {
   const add = useSubscriptionStore((s) => s.add);
   const subscriptions = useSubscriptionStore((s) => s.subscriptions);
+  const setLastGmailScanAt = useUiPrefsStore((s) => s.setLastGmailScanAt);
 
   const [scanPhase, setScanPhase] = useState<ScanPhase>({ phase: 'idle' });
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -60,6 +62,7 @@ export default function GmailScanScreen() {
       const candidates = await scanGmailForSubscriptions(token);
 
       setScanPhase({ phase: 'done', candidates });
+      setLastGmailScanAt(new Date().toISOString());
       setSelected(new Set());
       setDetails(new Map());
     } catch (err) {
