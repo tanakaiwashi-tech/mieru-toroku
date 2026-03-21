@@ -46,9 +46,14 @@ export function SubscriptionListItem({ subscription, onPress }: SubscriptionList
       <View style={styles.body}>
         <View style={styles.topRow}>
           <Text style={styles.name} numberOfLines={1}>{subscription.serviceName}</Text>
-          <Text style={styles.amount}>
+          <Text style={[
+            styles.amount,
+            subscription.amount === 0 && subscription.billingCycle !== 'free' && styles.amountUnset,
+          ]}>
             {subscription.billingCycle === 'free'
               ? '無料'
+              : subscription.amount === 0
+              ? '未設定'
               : `${formatAmount(subscription.amount, subscription.currency ?? 'JPY')} / ${BILLING_CYCLE_LABELS[subscription.billingCycle]}`}
           </Text>
         </View>
@@ -130,6 +135,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: COLORS.text,
     fontWeight: '700',
+  },
+  amountUnset: {
+    fontSize: 13,
+    color: COLORS.textMuted,
+    fontWeight: '400',
+    fontStyle: 'italic',
   },
   avatarOverdue: {
     backgroundColor: COLORS.destructiveLight,

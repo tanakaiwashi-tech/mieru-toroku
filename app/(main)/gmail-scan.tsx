@@ -198,6 +198,16 @@ export default function GmailScanScreen() {
           </Text>
         </View>
 
+        {/* Google警告の事前説明 */}
+        {(scanPhase.phase === 'idle' || scanPhase.phase === 'error') && (
+          <View style={styles.tipCard}>
+            <Ionicons name="information-circle-outline" size={16} color={COLORS.textSecondary} />
+            <Text style={styles.tipText}>
+              ログイン時に<Text style={styles.tipBold}>「確認されていないアプリ」</Text>と表示されますが正常です。「詳細」→「続行」と進んでください。
+            </Text>
+          </View>
+        )}
+
         {/* スキャンボタン */}
         {(scanPhase.phase === 'idle' || scanPhase.phase === 'error') && (
           <TouchableOpacity style={styles.scanBtn} onPress={handleScan}>
@@ -479,6 +489,27 @@ const styles = StyleSheet.create({
   },
   bold: {
     fontWeight: '600',
+  },
+  tipCard: {
+    flexDirection: 'row',
+    gap: 8,
+    backgroundColor: COLORS.surface,
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    alignItems: 'flex-start',
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    lineHeight: 18,
+  },
+  tipBold: {
+    fontWeight: '600',
+    color: COLORS.text,
   },
   scanBtn: {
     flexDirection: 'row',
