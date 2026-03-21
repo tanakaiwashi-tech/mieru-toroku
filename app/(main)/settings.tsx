@@ -151,7 +151,16 @@ export default function SettingsScreen() {
         </View>
 
         {/* データ管理 */}
-        <Text style={styles.groupLabel}>データ管理</Text>
+        <Text style={[styles.groupLabel, styles.groupLabelGap]}>データ管理</Text>
+
+        {/* エクスポート推奨バナー */}
+        <View style={styles.exportReminder}>
+          <Ionicons name="warning-outline" size={14} color={COLORS.warning.text} />
+          <Text style={styles.exportReminderText}>
+            ブラウザのデータ消去でデータが消えます。定期的なエクスポートをおすすめします。
+          </Text>
+        </View>
+
         <View style={styles.group}>
 
           {/* JSON エクスポート */}
@@ -363,6 +372,23 @@ const styles = StyleSheet.create({
   rowValue: {
     fontSize: 14,
     color: COLORS.textMuted,
+  },
+  exportReminder: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 6,
+    backgroundColor: COLORS.warning.bg,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.warning.border,
+    padding: 10,
+    marginBottom: 8,
+  },
+  exportReminderText: {
+    flex: 1,
+    fontSize: 12,
+    color: COLORS.warning.text,
+    lineHeight: 18,
   },
   hint: {
     fontSize: 12,

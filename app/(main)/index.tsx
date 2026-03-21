@@ -51,7 +51,15 @@ function EmptyState() {
         activeOpacity={0.8}
       >
         <Ionicons name="add" size={18} color="#FFFFFF" />
-        <Text style={styles.emptyButtonText}>最初のサブスクを登録する</Text>
+        <Text style={styles.emptyButtonText}>手動で登録する</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.emptyGmailButton}
+        onPress={() => router.push('/(main)/gmail-scan')}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="mail-outline" size={16} color={COLORS.primary} />
+        <Text style={styles.emptyGmailButtonText}>Gmailから自動で探す</Text>
       </TouchableOpacity>
     </View>
   );
@@ -377,6 +385,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     flexShrink: 0,
+  },
+  emptyGmailButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primaryLight,
+    alignSelf: 'center',
+  },
+  emptyGmailButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.primary,
   },
   clearButton: {
     marginTop: 4,
