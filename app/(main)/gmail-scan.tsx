@@ -30,6 +30,7 @@ type ScanPhase =
 
 export default function GmailScanScreen() {
   const add = useSubscriptionStore((s) => s.add);
+  const subscriptions = useSubscriptionStore((s) => s.subscriptions);
 
   const [scanPhase, setScanPhase] = useState<ScanPhase>({ phase: 'idle' });
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -70,13 +71,24 @@ export default function GmailScanScreen() {
     });
   };
 
+  // ─── 既存登録済みチェック ─────────────────────────────────────
+  const registeredNames = new Set(
+    subscriptions.map((s) => s.serviceName.toLowerCase().trim()),
+  );
+  const isAlreadyRegistered = (displayName: string) =>
+    registeredNames.has(displayName.toLowerCase().trim());
+
   // ─── 選択した候補を登録 ───────────────────────────────────────
   const handleRegister = async () => {
-    if (scanPhase.phase !== 'done') return;
+    if (scanPhase.phase !== 'done' || isRegistering) return;
     const targets = scanPhase.candidates.filter((c) =>
-      selected.has(c.pattern.normalizedName),
+      selected.has(c.pattern.normalizedName) &&
+      !isAlreadyRegistered(c.pattern.displayName),
     );
-    if (targets.length === 0) return;
+    if (targets.length === 0) {
+      Alert.alert('確認', '新しく登録できるサービスがありません（すでに登録済みです）。');
+      return;
+    }
 
     setIsRegistering(true);
     let successCount = 0;
@@ -102,6 +114,7 @@ export default function GmailScanScreen() {
     }
 
     setIsRegistering(false);
+    setSelected(new Set());
     Alert.alert(
       '登録完了',
       `${successCount}件を登録しました。\n金額・更新日は詳細画面から編集してください。`,
@@ -182,22 +195,38 @@ export default function GmailScanScreen() {
         {candidates.map((candidate) => {
           const key = candidate.pattern.normalizedName;
           const isSelected = selected.has(key);
+          const alreadyRegistered = isAlreadyRegistered(candidate.pattern.displayName);
           return (
             <TouchableOpacity
               key={key}
-              style={[styles.candidateCard, isSelected && styles.candidateCardSelected]}
-              onPress={() => toggleSelect(key)}
-              activeOpacity={0.7}
+              style={[
+                styles.candidateCard,
+                isSelected && styles.candidateCardSelected,
+                alreadyRegistered && styles.candidateCardRegistered,
+              ]}
+              onPress={() => !alreadyRegistered && toggleSelect(key)}
+              activeOpacity={alreadyRegistered ? 1 : 0.7}
             >
               <View style={styles.candidateLeft}>
-                <View style={[styles.checkbox, isSelected && styles.checkboxChecked]}>
-                  {isSelected && (
-                    <Ionicons name="checkmark" size={14} color="#fff" />
-                  )}
-                </View>
+                {alreadyRegistered ? (
+                  <Ionicons name="checkmark-circle" size={22} color={COLORS.primary} />
+                ) : (
+                  <View style={[styles.checkbox, isSelected && styles.checkboxChecked]}>
+                    {isSelected && (
+                      <Ionicons name="checkmark" size={14} color="#fff" />
+                    )}
+                  </View>
+                )}
               </View>
               <View style={styles.candidateBody}>
-                <Text style={styles.candidateName}>{candidate.pattern.displayName}</Text>
+                <View style={styles.candidateNameRow}>
+                  <Text style={styles.candidateName}>{candidate.pattern.displayName}</Text>
+                  {alreadyRegistered && (
+                    <View style={styles.registeredBadge}>
+                      <Text style={styles.registeredBadgeText}>登録済み</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={styles.candidateFrom} numberOfLines={1}>
                   {candidate.from}
                 </Text>
@@ -361,6 +390,26 @@ const styles = StyleSheet.create({
   candidateCardSelected: {
     borderColor: COLORS.primary,
     backgroundColor: COLORS.primaryLight,
+  },
+  candidateCardRegistered: {
+    opacity: 0.6,
+  },
+  candidateNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexWrap: 'wrap',
+  },
+  registeredBadge: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  registeredBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#fff',
   },
   candidateLeft: {
     marginRight: 12,
